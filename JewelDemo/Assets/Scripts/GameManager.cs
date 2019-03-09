@@ -69,6 +69,14 @@ public class GameManager : MonoBehaviour
             Debug.Log("Drop");
             yield return new WaitForSeconds(dropTime);
         }
+
+
+        // 重新匹配下落
+        if (allMatchDestory())
+        {
+            yield return new WaitForSeconds(0.3f);
+            StartCoroutine(AllDrop());
+        }
     }
 
     // 分布下落
@@ -186,6 +194,10 @@ public class GameManager : MonoBehaviour
                 yield return new WaitForSeconds(dropTime);
 
                 exchangeMove(currItem, otherItem);
+            }else
+            {
+                yield return new WaitForSeconds(0.3f);
+                StartCoroutine(AllDrop());
             }
 
         }
@@ -208,10 +220,11 @@ public class GameManager : MonoBehaviour
     }
 
     // 所有元素消除匹配
-    private void allMatchDestory()
+    private bool allMatchDestory()
     {
         int rowCount = _model.m_RowCount;
         int colCount = _model.m_ColCount;
+        bool isDestory = false;
         for (int row = 0; row < rowCount; row++)
         {
             for (int col = 0; col < colCount; col++)
@@ -219,9 +232,14 @@ public class GameManager : MonoBehaviour
                 // 逐个匹配
                 GameObject curObj = spArr[row, col];
 
-
+                if (destoryMatchItems(curObj))
+                {
+                    isDestory = true;
+                }
             }
         }
+
+        return isDestory;
     }
 
     /// <summary>
@@ -328,6 +346,8 @@ public class GameManager : MonoBehaviour
     // 遍历该元素周围的元素
     private void findMatchItem(GameObject curObj)
     {
+        if (curObj == null) return;
+        if (!curObj.GetComponent<GameSp>().canMove()) return;
         if (!curMatchObjArr.Contains(curObj)) curMatchObjArr.Add(curObj);
         else return;
 
@@ -335,25 +355,33 @@ public class GameManager : MonoBehaviour
         int rowCount = _model.m_RowCount;
         int colCount = _model.m_ColCount;
         // top
-        if (curSp.Row + 1 < rowCount && spArr[curSp.Row + 1, curSp.Col].GetComponent<GameSp>().StyleType == curSp.StyleType)
+        if (curSp.Row + 1 < rowCount &&
+            spArr[curSp.Row + 1, curSp.Col] != null &&
+            spArr[curSp.Row + 1, curSp.Col].GetComponent<GameSp>().StyleType == curSp.StyleType)
         {
             findMatchItem(spArr[curSp.Row + 1, curSp.Col]);
         }
 
         // right
-        if (curSp.Col + 1 < colCount && spArr[curSp.Row, curSp.Col + 1].GetComponent<GameSp>().StyleType == curSp.StyleType)
+        if (curSp.Col + 1 < colCount &&
+            spArr[curSp.Row, curSp.Col + 1] != null &&
+            spArr[curSp.Row, curSp.Col + 1].GetComponent<GameSp>().StyleType == curSp.StyleType)
         {
             findMatchItem(spArr[curSp.Row, curSp.Col + 1]);
         }
 
         // left
-        if (curSp.Col - 1 >= 0 && spArr[curSp.Row, curSp.Col - 1].GetComponent<GameSp>().StyleType == curSp.StyleType)
+        if (curSp.Col - 1 >= 0 &&
+            spArr[curSp.Row, curSp.Col - 1] != null &&
+            spArr[curSp.Row, curSp.Col - 1].GetComponent<GameSp>().StyleType == curSp.StyleType)
         {
             findMatchItem(spArr[curSp.Row, curSp.Col - 1]);
         }
 
         // down
-        if (curSp.Row - 1 >= 0 && spArr[curSp.Row - 1, curSp.Col].GetComponent<GameSp>().StyleType == curSp.StyleType)
+        if (curSp.Row - 1 >= 0 &&
+            spArr[curSp.Row - 1, curSp.Col] != null &&
+            spArr[curSp.Row - 1, curSp.Col].GetComponent<GameSp>().StyleType == curSp.StyleType)
         {
             findMatchItem(spArr[curSp.Row - 1, curSp.Col]);
         }
